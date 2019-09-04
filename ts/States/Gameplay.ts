@@ -21,6 +21,10 @@ export default class Gameplay extends Phaser.State {
     private floor: Phaser.TileSprite;
 
     private player: Phaser.Sprite;
+    //private maxHearts: number = 3;
+    private spriteHearts: Phaser.Sprite;
+    //private heartArray: Phaser.Sprite[] = [];
+    private heartGroup: Phaser.Group;
 
     private jumpButton: Phaser.Key;
 
@@ -40,6 +44,7 @@ export default class Gameplay extends Phaser.State {
 
     public preload(): void {
         this.game.load.spritesheet('playerWalk', 'assets/images/player/walk/playerWalk.png', 480, 480);
+        this.game.load.image('heartContainer', 'assets/images/player/health/heartContainer.png');
     }
 
     public create(): void {
@@ -64,6 +69,7 @@ export default class Gameplay extends Phaser.State {
         this.player.body.collideWorldBounds = true;
 
         this.player.scale.setTo(0.2, 0.2);
+        this.player.anchor.setTo(0.5);
         this.player.position.setTo(100, 700);
 
         this.jumpButton = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
@@ -71,6 +77,21 @@ export default class Gameplay extends Phaser.State {
         // Animation
         this.player.animations.add('pl_walk');
         this.player.animations.play('pl_walk', 30, true);
+
+        // Heart containers
+        this.heartGroup = this.game.add.group();
+
+       //this.heartContainer = this.maxHearts;
+        let positionIncrement: number = 30;
+        let offset: number = this.player.position.x - 23;
+        for (let i: number = 0; i < 3; i++) {
+            this.spriteHearts = this.game.add.sprite(offset + (i * positionIncrement), 0, 'heartContainer');
+            this.spriteHearts.anchor.setTo(0.5);
+            this.spriteHearts.scale.setTo(0.07);
+            this.heartGroup.add(this.spriteHearts);
+        }
+
+        console.log(this.heartGroup);
 
         //let textStyle: any = {font: 'bold ' + 30 * Constants.GAME_SCALE + 'px Arial', fill: '#FFFFFF'};
 
@@ -83,6 +104,8 @@ export default class Gameplay extends Phaser.State {
     }
 
     public update(): void {
+        this.heartGroup.y = ((this.player.position.y - this.player.height) + 30);
+        //this.heartGroup.forEach(this.moveHeart, this);
 
         // Move background
         this.background.tilePosition.x -= 2;
@@ -90,12 +113,20 @@ export default class Gameplay extends Phaser.State {
 
         if (this.jumpButton.isDown && this.player.body.blocked.down === true) {
             this.player.body.velocity.y = -500;
-            //jumpTimer = game.time.now + 750;
         }
+
+        //this.heartGroup.y = this.player.position.y - this.player.height - 5;
 
         // private startMenu(): void {
         //     this.game.state.add(Menu.Name, Menu, true);
         // }
+    }
+
+    public moveHeart(heart: Phaser.Sprite): void {
+        // let speed: number = 10;
+        // heart.y += 500;
+        heart.y = this.player.position.y - this.player.height - 5;
+
     }
 
     /**
