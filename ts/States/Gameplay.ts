@@ -21,9 +21,8 @@ export default class Gameplay extends Phaser.State {
     private floor: Phaser.TileSprite;
 
     private player: Phaser.Sprite;
-    //private maxHearts: number = 3;
+    private playerHearts: number = 3;
     private spriteHearts: Phaser.Sprite;
-    //private heartArray: Phaser.Sprite[] = [];
     private heartGroup: Phaser.Group;
 
     private jumpButton: Phaser.Key;
@@ -90,7 +89,6 @@ export default class Gameplay extends Phaser.State {
             this.spriteHearts.scale.setTo(0.07);
             this.heartGroup.add(this.spriteHearts);
         }
-
         console.log(this.heartGroup);
 
         //let textStyle: any = {font: 'bold ' + 30 * Constants.GAME_SCALE + 'px Arial', fill: '#FFFFFF'};
@@ -113,6 +111,9 @@ export default class Gameplay extends Phaser.State {
 
         if (this.jumpButton.isDown && this.player.body.blocked.down === true) {
             this.player.body.velocity.y = -500;
+
+            // Destroy lives
+            //this.destroyHearts(this.playerHearts);
         }
 
         //this.heartGroup.y = this.player.position.y - this.player.height - 5;
@@ -122,10 +123,14 @@ export default class Gameplay extends Phaser.State {
         // }
     }
 
-    public moveHeart(heart: Phaser.Sprite): void {
-        // let speed: number = 10;
-        // heart.y += 500;
-        heart.y = this.player.position.y - this.player.height - 5;
+    // Destroy lives function
+    public destroyHearts(heart: number): void {
+        if (heart > 0) {
+            heart--;
+            this.heartGroup.remove(this.heartGroup.getTop(), true);
+
+            console.log('lives left: ' + this.playerHearts);
+        }
 
     }
 
