@@ -25,6 +25,8 @@ export default class Gameplay extends Phaser.State {
     private spriteHearts: Phaser.Sprite;
     private heartGroup: Phaser.Group;
 
+    private voidCreature: Phaser.Sprite;
+
     private jumpButton: Phaser.Key;
 
     //private text: Label;
@@ -43,6 +45,7 @@ export default class Gameplay extends Phaser.State {
 
     public preload(): void {
         this.game.load.spritesheet('playerWalk', 'assets/images/player/walk/playerWalk.png', 480, 480);
+        this.game.load.spritesheet('voidCreature', 'assets/images/enemy/void/voidCreature.png', 28, 36);
         this.game.load.image('heartContainer', 'assets/images/player/health/heartContainer.png');
     }
 
@@ -67,20 +70,19 @@ export default class Gameplay extends Phaser.State {
         this.player.body.maxVelocity.y = 500;
         this.player.body.collideWorldBounds = true;
 
-        this.player.scale.setTo(0.2, 0.2);
+        this.player.scale.setTo(0.2);
         this.player.anchor.setTo(0.5);
         this.player.position.setTo(100, 700);
 
         this.jumpButton = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
-        // Animation
+        // Player Animation
         this.player.animations.add('pl_walk');
         this.player.animations.play('pl_walk', 30, true);
 
         // Heart containers
         this.heartGroup = this.game.add.group();
 
-       //this.heartContainer = this.maxHearts;
         let positionIncrement: number = 30;
         let offset: number = this.player.position.x - 23;
         for (let i: number = 0; i < 3; i++) {
@@ -90,6 +92,17 @@ export default class Gameplay extends Phaser.State {
             this.heartGroup.add(this.spriteHearts);
         }
         console.log(this.heartGroup);
+
+        // Enemy
+        this.voidCreature = this.game.add.sprite(0, 0, 'voidCreature');
+
+        this.voidCreature.scale.setTo(1.5);
+        this.voidCreature.anchor.setTo(0.5);
+        this.voidCreature.position.setTo(650, 650);
+
+        // Enemy Animation
+        this.voidCreature.animations.add('void_creature');
+        this.voidCreature.animations.play('void_creature', 7, true);
 
         //let textStyle: any = {font: 'bold ' + 30 * Constants.GAME_SCALE + 'px Arial', fill: '#FFFFFF'};
 
