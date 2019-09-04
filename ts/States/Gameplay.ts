@@ -22,6 +22,8 @@ export default class Gameplay extends Phaser.State {
 
     private player: Phaser.Sprite;
 
+    private jumpButton: Phaser.Key;
+
     //private text: Label;
     //private backBtn: LabeledButton;
 
@@ -45,22 +47,30 @@ export default class Gameplay extends Phaser.State {
         //Send a screen view to Google to track different states
         // this.game.analytics.google.sendScreenView(this.name);
 
+        this.game.physics.startSystem(Phaser.Physics.ARCADE);
+        this.game.physics.arcade.gravity.y = 300;
+
         //this.background = this.game.add.image(0, 0, Images.BACKGROUND);
         this.background = this.game.add.tileSprite(0, 0, this.world.bounds.width, this.game.cache.getImage(Images.BACKGROUND).height, Images.BACKGROUND);
-        this.floor = this.game.add.tileSprite(0, 680, this.world.bounds.width, this.game.cache.getImage(Images.FLOOR).height, Images.FLOOR);
-        //this.floor = this.game.add.image(0, 680, Images.FLOOR);
 
-        // Sprite
+        this.floor = this.game.add.tileSprite(0, 700, this.world.bounds.width, this.game.cache.getImage(Images.FLOOR).height, Images.FLOOR);
+
+        // Player
         this.player = this.game.add.sprite(0, 0, 'playerWalk');
 
+        this.game.physics.enable(this.player, Phaser.Physics.ARCADE);
+        this.player.body.gravity.y = 1000;
+        this.player.body.maxVelocity.y = 500;
+        this.player.body.collideWorldBounds = true;
+
         this.player.scale.setTo(0.2, 0.2);
-        this.player.position.setTo(100, (this.floor.y - (this.player.height / 1.25)));
+        this.player.position.setTo(100, 700);
+
+        this.jumpButton = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
         // Animation
         this.player.animations.add('pl_walk');
-        this.player.animations.play('pl_walk', 30, true, false);
-
-        this.game.camera.follow(this.player, Phaser.Camera.FOLLOW_LOCKON, 0.1, 0.1);
+        this.player.animations.play('pl_walk', 30, true);
 
         //let textStyle: any = {font: 'bold ' + 30 * Constants.GAME_SCALE + 'px Arial', fill: '#FFFFFF'};
 
@@ -73,23 +83,20 @@ export default class Gameplay extends Phaser.State {
     }
 
     public update(): void {
-        //console.log(this.player.animations.play('walk'));
 
         // Move background
         this.background.tilePosition.x -= 2;
         this.floor.tilePosition.x -= 2;
 
-        // Move player
-        // this.player.x += 3;
+        if (this.jumpButton.isDown && this.player.body.blocked.down === true) {
+            this.player.body.velocity.y = -500;
+            //jumpTimer = game.time.now + 750;
+        }
 
-        // if (this.player.x > 800)  {
-        //     this.player.x = -50;
+        // private startMenu(): void {
+        //     this.game.state.add(Menu.Name, Menu, true);
         // }
     }
-
-    // private startMenu(): void {
-    //     this.game.state.add(Menu.Name, Menu, true);
-    // }
 
     /**
      * Called every time the rotation or game size has changed.
