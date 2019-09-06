@@ -11,6 +11,8 @@ import Player from '../Objects/Scene/Player';
 import Enemy from '../Objects/Scene/Enemy';
 import Hazard from '../Objects/Scene/Hazard';
 
+import Environment from '../Objects/Scene/Environment';
+
 import {Sounds, /*Constants,*/ Images, Atlases} from '../Data';
 //import {Menu} from './';
 
@@ -31,6 +33,8 @@ export default class Gameplay extends Phaser.State {
     public player: Player;
     public enemy: Enemy;
     public hazard: Hazard;
+
+    public environment: Environment;
 
     private hostileCount: number = 0;
     private waveChecker: number = 0;
@@ -83,6 +87,8 @@ export default class Gameplay extends Phaser.State {
 
         this.world.bringToTop(this.floor);
         this.resize();
+
+        this.environment = new Environment();
     }
 
     public update(): void {
@@ -171,6 +177,7 @@ export default class Gameplay extends Phaser.State {
         // Player jump
         if (this.player.jumpButton.isDown && this.onFloor) {
             this.player.jump();
+            //this.environment.zap();
         }
 
         // Destroy enemy on going out of bounds
