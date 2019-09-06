@@ -7,6 +7,9 @@ import IGame from '../Fabrique/IGame';
 //import LabeledButton from '../Objects/LabeledButton';
 import SoundManager from '../Managers/SoundManager';
 
+import Player from '../Objects/Player';
+import Enemy from '../Objects/Enemy';
+
 import {Sounds, /*Constants,*/ Images} from '../Data';
 //import {Menu} from './';
 
@@ -18,16 +21,11 @@ export default class Gameplay extends Phaser.State {
     public game: IGame;
 
     private background: Phaser.TileSprite;
-    private floor: Phaser.TileSprite;
+    public floor: Phaser.TileSprite;
+    private onFloor: boolean = false;
 
-    private player: Phaser.Sprite;
-    private playerHearts: number = 3;
-    private spriteHearts: Phaser.Sprite;
-    private heartGroup: Phaser.Group;
-
-    private voidCreature: Phaser.Sprite;
-
-    private jumpButton: Phaser.Key;
+    public player: Player;
+    public enemy: Enemy;
 
     //private text: Label;
     //private backBtn: LabeledButton;
@@ -39,118 +37,84 @@ export default class Gameplay extends Phaser.State {
     public init(): void {
         this.game.world.removeAll();
 
+        this.game.world.setBounds(0, 0, 1280, 720);
+
         //Play background music
         SoundManager.getInstance().playMusic(Sounds.GameMusic);
     }
 
     public preload(): void {
-        this.game.load.spritesheet('playerWalk', 'assets/images/player/walk/playerWalk.png', 480, 480);
-        this.game.load.spritesheet('voidCreature', 'assets/images/enemy/void/voidCreature.png', 28, 36);
-        this.game.load.image('heartContainer', 'assets/images/player/health/heartContainer.png');
+        this.game.load.spritesheet('playerWalk', 'assets/images/player/walk/playerWalk.png', 480, 480, 12);
+        this.game.load.spritesheet('skeletonKnight', 'assets/images/enemy/skeletonKnight/skeletonKnight.png', 384, 384, 17);
     }
 
     public create(): void {
         super.create();
+        this.game.physics.startSystem(Phaser.Physics.ARCADE);
+
         //Send a screen view to Google to track different states
         // this.game.analytics.google.sendScreenView(this.name);
 
-        this.game.physics.startSystem(Phaser.Physics.ARCADE);
-        this.game.physics.arcade.gravity.y = 300;
-
-        //this.background = this.game.add.image(0, 0, Images.BACKGROUND);
         this.background = this.game.add.tileSprite(0, 0, this.world.bounds.width, this.game.cache.getImage(Images.BACKGROUND).height, Images.BACKGROUND);
 
         this.floor = this.game.add.tileSprite(0, 700, this.world.bounds.width, this.game.cache.getImage(Images.FLOOR).height, Images.FLOOR);
+        this.game.physics.enable(this.floor, Phaser.Physics.ARCADE);
+        this.floor.body.immovable = true;
+        this.floor.body.gravity.y = 0;
 
-        // Player
-        this.player = this.game.add.sprite(0, 0, 'playerWalk');
+        this.player = new Player(this.game, 200, 200, 'playerWalk');
+        this.player.position.setTo(100, (this.floor.y - (this.player.height / 3.1)));
+        //enemy.position.setTo(this.game.world.width, this.floor.y - (enemy.height / 3));
 
-        this.game.physics.enable(this.player, Phaser.Physics.ARCADE);
-        this.player.body.gravity.y = 1000;
-        this.player.body.maxVelocity.y = 500;
-        this.player.body.collideWorldBounds = true;
+        this.enemy = new Enemy(this.game, 200, 200, 'skeletonKnight');
 
-        this.player.scale.setTo(0.2);
-        this.player.anchor.setTo(0.5);
-        this.player.position.setTo(100, 700);
-
-        this.jumpButton = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-
-        // Player Animation
-        this.player.animations.add('pl_walk');
-        this.player.animations.play('pl_walk', 30, true);
-
-        // Heart containers
-        this.heartGroup = this.game.add.group();
-
-        let positionIncrement: number = 30;
-        let offset: number = this.player.position.x - 23;
-        for (let i: number = 0; i < 3; i++) {
-            this.spriteHearts = this.game.add.sprite(offset + (i * positionIncrement), 0, 'heartContainer');
-            this.spriteHearts.anchor.setTo(0.5);
-            this.spriteHearts.scale.setTo(0.07);
-            this.heartGroup.add(this.spriteHearts);
-        }
-        console.log(this.heartGroup);
-
-        // Enemy
-        this.voidCreature = this.game.add.sprite(0, 0, 'voidCreature');
-
-        this.voidCreature.scale.setTo(1.5);
-        this.voidCreature.anchor.setTo(0.5);
-        this.voidCreature.position.setTo(650, 650);
-
-        // Enemy Animation
-        this.voidCreature.animations.add('void_creature');
-        this.voidCreature.animations.play('void_creature', 7, true);
-
-        //let textStyle: any = {font: 'bold ' + 30 * Constants.GAME_SCALE + 'px Arial', fill: '#FFFFFF'};
-
-        //this.text = new Label(this.game, 0, 0, 'time_to_play', textStyle);
-
-        //this.backBtn = new LabeledButton(this.game, 0, 0, 'back', textStyle, this.startMenu, this, 300, 100);
-        //this.backBtn.setFrames('btn_blue', 'btn_blue', 'btn_blue_onpress', 'btn_blue');
+        this.enemy.SwitchEnemy();
+        this.enemy.SpawnEnemy();
 
         this.resize();
     }
 
     public update(): void {
-        this.heartGroup.y = ((this.player.position.y - this.player.height) + 30);
-        //this.heartGroup.forEach(this.moveHeart, this);
+        // Lock player on x position
+        this.player.x = 100;
 
         // Move background
         this.background.tilePosition.x -= 2;
         this.floor.tilePosition.x -= 2;
 
-        if (this.jumpButton.isDown && this.player.body.blocked.down === true) {
-            this.player.body.velocity.y = -500;
-
-            // Destroy lives
-            //this.destroyHearts(this.playerHearts);
+        //Check floor collision
+        if (this.game.physics.arcade.collide(this.player, this.floor)) {
+            console.log('Collision with Floor');
+            this.onFloor = true;
+        } else {
+            this.onFloor = false;
         }
 
-        //this.heartGroup.y = this.player.position.y - this.player.height - 5;
+        // Player jump
+        if (this.player.jumpButton.isDown && this.onFloor) {
+            this.player.Jump();
+        }
+
+        // Destroy enemy on going out of bounds
+        this.enemy.enemyGroup.forEach((enemyObj: Phaser.Sprite) => {
+            if (enemyObj.x < 0) {
+                this.enemy.DestroyEnemy(enemyObj);
+            }
+        }, this);
+
+        // Destroy enemy on colliding with player
+        this.enemy.enemyGroup.forEach((enemyObj: Phaser.Sprite) => {
+            if (this.game.physics.arcade.collide(this.player, enemyObj)) {
+                this.enemy.DestroyEnemy(enemyObj);
+            }
+        }, this);
 
         // private startMenu(): void {
         //     this.game.state.add(Menu.Name, Menu, true);
         // }
     }
 
-    // Destroy lives function
-    public destroyHearts(heart: number): void {
-        if (heart > 0) {
-            heart--;
-            this.heartGroup.remove(this.heartGroup.getTop(), true);
-
-            console.log('lives left: ' + this.playerHearts);
-        }
-
-    }
-
-    /**
-     * Called every time the rotation or game size has changed.
-     * Rescales and repositions the objects.
-     */
+    // Resizing
     public resize(): void {
         this.background.width = this.game.width;
         this.background.height = this.game.height;

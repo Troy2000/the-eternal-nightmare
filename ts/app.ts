@@ -14,10 +14,10 @@ namespace BoilerPlate {
         constructor() {
             //We use Phaser's config object to create the game, since this is the only way to disable debugging
             super(<Phaser.IGameConfig>{
-                enableDebug: false,
                 width: GAME_WIDTH,
                 height: GAME_HEIGHT,
-                renderer: Phaser.AUTO,
+                enableDebug: true,
+                renderer: Phaser.CANVAS, //Normal use AUTO, for debugging it's best to switch to CANVAS
                 parent: 'content',
                 transparent: true,
                 antialias: true,

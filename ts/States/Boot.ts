@@ -172,7 +172,6 @@ export default class Boot extends Phaser.State {
 
         Images.preloadList.forEach((assetName: string) => {
             this.game.load.image(assetName, 'assets/images/' + assetName + '.png');
-            this.game.load.image(assetName, 'assets/images/walk' + assetName + '.png');
         });
 
         Atlases.preloadList.forEach((assetName: string) => {
