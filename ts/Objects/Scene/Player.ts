@@ -2,17 +2,17 @@ import 'p2';
 import 'pixi';
 import 'phaser';
 
-import IGame from '../Fabrique/IGame';
-import {Images} from '../Data';
+import IGame from '../../Fabrique/IGame';
+import {Images} from '../../Data';
 
 export default class Player extends Phaser.Sprite {
-    public static Name: string = 'gameplay';
+    public static Name: string = 'player';
     public static pause: boolean = false;
 
     public name: string = Player.Name;
     public game: IGame;
 
-    private heartCount: number = 3;
+    public heartCount: number = 3;
     private heartSprites: Phaser.Sprite;
     public heartGroup: Phaser.Group;
 
@@ -31,7 +31,7 @@ export default class Player extends Phaser.Sprite {
         this.scale.setTo(0.2);
         this.anchor.setTo(0.5, 0.5);
         //this.position.setTo(100, (this.floor.y - (this.player.height / 3.1)));
-        this.body.setSize(this.width * 2.2, this.height * 3.5, this.width * 1.7, this.height / 1.7);
+        this.body.setSize(this.width * 1.8, this.height * 3.5 , this.width * 1.8, this.height / 1.7);
 
         this.jumpButton = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
@@ -55,17 +55,19 @@ export default class Player extends Phaser.Sprite {
     public update(): void {
         // Position hearts above player
         this.heartGroup.y = ((this.y - this.height) + 30);
+
+        // If health is zero, destroy player
+        if (this.heartCount <= 0) {
+            this.destroy();
+        }
     }
 
     // Player
-    public Jump(): void {
+    public jump(): void {
         this.body.velocity.y = -500;
-
-        // Destroy lives
-        this.DestroyHearts(this.heartCount);
     }
 
-    private DestroyHearts(heart: number): void {
+    public destroyHearts(heart: number): void {
         if (heart > 0) {
             this.heartCount--;
             this.heartGroup.remove(this.heartGroup.getTop(), true);

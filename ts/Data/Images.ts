@@ -1,8 +1,14 @@
 export default class Images {
 
     public static BACKGROUND: string = 'background/bg_forest';
+    public static MOON: string = 'background/bg_moon';
     public static FLOOR: string = 'background/bg_floor';
+
+    public static STAGEBAR: string = 'background/bg_stagebar';
+    public static POINTER: string = 'background/bg_pointer';
+
     public static HEART: string = 'player/health/heartContainer';
+    public static WOODSPIKE: string = 'enemy/woodSpike/woodSpike';
 
     /**
      * A list of all images we need to show the preloader itself.
@@ -12,7 +18,11 @@ export default class Images {
         //Add images for the preloader
         Images.BACKGROUND,
         Images.FLOOR,
-        Images.HEART
+        Images.STAGEBAR,
+        Images.POINTER,
+        Images.HEART,
+        Images.WOODSPIKE,
+        Images.MOON
     ];
 
     /**

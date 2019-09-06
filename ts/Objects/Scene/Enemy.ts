@@ -2,10 +2,11 @@ import 'p2';
 import 'pixi';
 import 'phaser';
 
-import IGame from '../Fabrique/IGame';
+import IGame from '../../Fabrique/IGame';
+import {Atlases} from '../../Data';
 
 export default class Enemy extends Phaser.Sprite {
-    public static Name: string = 'gameplay';
+    public static Name: string = 'enemy';
     public static pause: boolean = false;
 
     public name: string = Enemy.Name;
@@ -13,7 +14,7 @@ export default class Enemy extends Phaser.Sprite {
 
     public enemyGroup: Phaser.Group;
     public currentEnemy: Phaser.Sprite;
-    private enemySprite: string;
+    public enemySprite: string;
 
     constructor(game: Phaser.Game, x: number, y: number, key: string) {
         super(game, x, y, key);
@@ -38,20 +39,24 @@ export default class Enemy extends Phaser.Sprite {
     }
 
     // Switch enemy type
-    public SwitchEnemy(): void {
-        let randomEnemy: string[] = ['skeletonKnight'];
-        this.enemySprite = randomEnemy[Math.floor(Math.random() * randomEnemy.length)];
+    public switchEnemy(): void {
+        let spawnEnemies: string[] = ['SkeletonKnight', 'SkeletonWarrior'];
+        let randomEnemy: string = spawnEnemies[Math.floor(Math.random() * spawnEnemies.length)];
+
+        //let speed: string = spawnObjects[Math.floor(Math.random() * spawnObjects.length)];
+        switch (randomEnemy) {
+            case 'SkeletonKnight':
+                this.enemySprite = Atlases.SkeletonKnight;
+                break;
+            case 'SkeletonWarrior':
+                this.enemySprite = Atlases.SkeletonWarrior;
+                break;
+            default:
+                break;
+        }
     }
 
-    // Spawn enemy
-    public SpawnEnemy(): void {
-        setTimeout(() => {
-            this.EnemySpawner(this.currentEnemy);
-            this.SpawnEnemy();
-        }, 1000 + Math.random() * 2000);
-    }
-
-    public EnemySpawner(enemy: Phaser.Sprite): void {
+    public enemySpawner(enemy: Phaser.Sprite): void {
         // Enemy initiliaze
         enemy = this.game.add.sprite(0, 0, this.enemySprite);
         this.game.physics.enable(enemy, Phaser.Physics.ARCADE);
@@ -71,7 +76,7 @@ export default class Enemy extends Phaser.Sprite {
         this.currentEnemy = enemy;
     }
 
-    public DestroyEnemy(enemy: Phaser.Sprite): void {
+    public destroyEnemy(enemy: Phaser.Sprite): void {
         this.enemyGroup.remove(enemy, true);
 
         console.log('Enemy destroyed');
